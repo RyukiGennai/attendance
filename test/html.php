@@ -4,11 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>出席管理システム</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <!-- Font -->
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Noto Sans JP', sans-serif; }
@@ -18,10 +15,8 @@
 </head>
 <body class="bg-gray-50 text-gray-900 min-h-screen">
 
-    <!-- トースト通知用コンテナ -->
     <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2"></div>
 
-    <!-- ヘッダー -->
     <header class="sticky top-0 z-10 bg-white/80 backdrop-blur-md shadow-sm border-b">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
             <div class="flex items-center gap-2">
@@ -40,10 +35,8 @@
         </div>
     </header>
 
-    <!-- メインコンテンツ -->
     <main id="app" class="max-w-5xl mx-auto p-4 sm:p-6 lg:p-8">
-        <!-- ここにJavaScriptで画面が描画されます -->
-    </main>
+        </main>
 
     <script>
         // --- データ定義 ---
@@ -53,7 +46,7 @@
             { id: 'K023C0082', password: 'password', role: 'student', name: '清水屋 雄紀', studentId: 'K023C0082' },
             { id: 'K023C0020', password: 'password', role: 'student', name: '筌野 来海', studentId: 'K023C0020' },
             { id: 'K023C0022', password: 'password', role: 'student', name: '呉 荻' , studentId: 'K023C0022'},
-            { id: 'K023C0048', password: 'password', role: 'student', name: '岡田　空' , studentId: 'K023C0048'},
+            { id: 'K023C0048', password: 'password', role: 'student', name: '岡田 空' , studentId: 'K023C0048'},
         ];
 
         // --- 状態管理 (State) ---
@@ -101,7 +94,9 @@
         };
 
         const renderIcons = () => {
-            lucide.createIcons();
+            if (window.lucide) {
+                lucide.createIcons();
+            }
         };
 
         // --- ロジック関数 ---
@@ -210,44 +205,6 @@
             render();
         };
 
-        // 教員用: 欠席一括登録
-        const handleFinalizeAbsences = () => {
-            if (!state.activeForm) return;
-            if (!confirm('未提出の学生をすべて「欠席」として登録しますか？')) return;
-
-            const allStudents = users.filter(u => u.role === 'student');
-            const submittedIds = new Set(state.activeForm.attendanceList.map(s => s.studentId));
-            const missing = allStudents.filter(s => s.studentId && !submittedIds.has(s.studentId));
-
-            if (missing.length === 0) {
-                showToast('未提出の学生はいません', 'info');
-                return;
-            }
-
-            const now = Date.now();
-            missing.forEach(student => {
-                state.activeForm.attendanceList.push({
-                    studentId: student.studentId,
-                    studentName: student.name,
-                    timestamp: now,
-                    status: '欠席',
-                    comment: '自動欠席'
-                });
-                state.attendanceRecords.push({
-                    id: `rec-${now}-${student.studentId}`,
-                    studentId: student.studentId,
-                    studentName: student.name,
-                    className: state.activeForm.className,
-                    date: state.activeForm.date,
-                    status: '欠席',
-                    comment: '自動欠席'
-                });
-            });
-
-            showToast(`${missing.length}名を欠席として登録しました`);
-            render();
-        };
-
         // 新規追加ボタン
         const handleAddRecord = () => {
             state.editingRecord = {
@@ -309,24 +266,6 @@
                 showToast('削除しました');
                 render();
             }
-        };
-
-        // CSV出力
-        const exportToCSV = () => {
-            if (!state.activeForm || state.activeForm.attendanceList.length === 0) {
-                showToast('データがありません', 'error');
-                return;
-            }
-            let csvContent = '\uFEFFNo,学籍番号,名前,時刻,状況\n';
-            state.activeForm.attendanceList.forEach((sub, i) => {
-                const time = new Date(sub.timestamp).toLocaleTimeString();
-                csvContent += `${i+1},${sub.studentId},${sub.studentName},${time},${sub.status}\n`;
-            });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = `attendance.csv`;
-            link.click();
         };
 
         // --- Render Functions (HTML生成) ---
@@ -462,11 +401,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="p-4 flex justify-end">
-                    <button onclick="handleFinalizeAbsences()" class="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm flex items-center gap-2">
-                        <i data-lucide="user-x" class="h-4 w-4"></i> 締め切り・欠席確定
-                    </button>
-                </div>
+                
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
                         <thead class="bg-gray-50">
@@ -483,8 +418,7 @@
                 </div>
                 <div class="p-4 bg-gray-50 border-t flex justify-between">
                     <button onclick="state.currentView='teacher-dashboard'; render()" class="px-4 py-2 border bg-white rounded hover:bg-gray-50">戻る</button>
-                    <button onclick="exportToCSV()" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 flex items-center gap-2"><i data-lucide="download" class="h-4 w-4"></i> CSV出力</button>
-                </div>
+                    </div>
             </div>
             `;
         };
