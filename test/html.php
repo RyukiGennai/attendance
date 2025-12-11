@@ -268,6 +268,55 @@
             }
         };
 
+        // --- Attendance list filtering helpers ---
+        // Update state by input and refresh only the table body so typing is responsive
+        const handleAttendanceFilterInput = (field, value) => {
+            if (field === 'searchDate') {
+                state.searchDate = value;
+            } else if (field === 'searchClassName') {
+                state.searchClassName = value;
+            } else if (field === 'searchName') {
+                state.searchName = value;
+            }
+            // Update table in-place without full re-render to preserve focus/caret
+            updateAttendanceTableInDOM();
+        };
+
+        const buildFilteredRowsHtml = () => {
+            const filtered = state.attendanceRecords.filter(r => {
+                const matchDate = !state.searchDate || r.date.includes(state.searchDate);
+                const matchName = !state.searchName || r.studentName.includes(state.searchName);
+                const matchClass = !state.searchClassName || r.className.includes(state.searchClassName);
+                return matchDate && matchName && matchClass;
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                return `<tr><td colspan="7" class="py-12 text-center text-gray-400">データがありません</td></tr>`;
+            }
+
+            return filtered.map(rec => `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 text-sm">${rec.date}</td>
+                    <td class="p-3">${rec.className}</td>
+                    <td class="p-3 font-mono text-sm">${rec.studentId}</td>
+                    <td class="p-3">${rec.studentName}</td>
+                    <td class="p-3"><span class="px-2 py-1 rounded text-xs ${rec.status === '出席' ? 'bg-gray-100' : 'bg-red-100'}">${rec.status}</span></td>
+                    <td class="p-3 text-sm text-gray-500">${rec.comment}</td>
+                    <td class="p-3 flex gap-2">
+                        <button onclick="startEditRecord('${rec.id}')" class="px-2 py-1 bg-blue-500 text-white text-xs rounded">編集</button>
+                        <button onclick="handleDeleteRecord('${rec.id}')" class="px-2 py-1 bg-red-500 text-white text-xs rounded">削除</button>
+                    </td>
+                </tr>
+            `).join('');
+        };
+
+        const updateAttendanceTableInDOM = () => {
+            // find tbody; if not found (view not mounted) do nothing
+            const tbody = document.getElementById('attendance-tbody');
+            if (!tbody) return;
+            tbody.innerHTML = buildFilteredRowsHtml();
+        };
+
         // --- Render Functions (HTML生成) ---
 
         const renderLogin = () => `
@@ -308,7 +357,7 @@
                         <button onclick="state.currentView='create-form'; generateCode(); render()" class="p-6 bg-blue-500 text-white rounded-xl shadow hover:bg-blue-600 transition flex flex-col items-center gap-2">
                             <i data-lucide="plus-circle" class="h-8 w-8"></i>
                             <span class="font-bold text-lg">出席フォーム作成</span>
-                            <span class="text-sm opacity-90">新しい授業を開始</span>
+                            <span class="text-sm.opacity-90">新しい授業を開始</span>
                         </button>
                         <button onclick="checkAndGoLive()" class="p-6 bg-emerald-500 text-white rounded-xl shadow hover:bg-emerald-600 transition flex flex-col items-center gap-2">
                             <i data-lucide="list-check" class="h-8 w-8"></i>
@@ -441,31 +490,8 @@
         };
 
         const renderAttendanceList = () => {
-            // フィルタリング
-            const filtered = state.attendanceRecords.filter(r => {
-                const matchDate = !state.searchDate || r.date.includes(state.searchDate);
-                const matchName = !state.searchName || r.studentName.includes(state.searchName);
-                const matchClass = !state.searchClassName || r.className.includes(state.searchClassName);
-                return matchDate && matchName && matchClass;
-            }).sort((a, b) => new Date(b.date) - new Date(a.date));
-
-            const listHtml = filtered.length === 0 
-                ? `<tr><td colspan="7" class="py-12 text-center text-gray-400">データがありません</td></tr>`
-                : filtered.map(rec => `
-                    <tr class="border-b hover:bg-gray-50">
-                        <td class="p-3 text-sm">${rec.date}</td>
-                        <td class="p-3">${rec.className}</td>
-                        <td class="p-3 font-mono text-sm">${rec.studentId}</td>
-                        <td class="p-3">${rec.studentName}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded text-xs ${rec.status === '出席' ? 'bg-gray-100' : 'bg-red-100'}">${rec.status}</span></td>
-                        <td class="p-3 text-sm text-gray-500">${rec.comment}</td>
-                        <td class="p-3 flex gap-2">
-                            <button onclick="startEditRecord('${rec.id}')" class="px-2 py-1 bg-blue-500 text-white text-xs rounded">編集</button>
-                            <button onclick="handleDeleteRecord('${rec.id}')" class="px-2 py-1 bg-red-500 text-white text-xs rounded">削除</button>
-                        </td>
-                    </tr>
-                `).join('');
-
+            // Render static layout for the attendance list and leave tbody empty.
+            // We will update tbody content dynamically per keystroke to preserve input focus.
             return `
             <div class="bg-white rounded-xl shadow-lg border border-gray-100 fade-in">
                 <div class="p-6 border-b flex justify-between items-center bg-purple-50">
@@ -473,9 +499,9 @@
                     <button onclick="handleAddRecord()" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm flex items-center gap-2"><i data-lucide="plus-circle" class="h-4 w-4"></i> 新規追加</button>
                 </div>
                 <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 border-b">
-                    <input type="date" class="p-2 border rounded" onchange="state.searchDate=this.value; render()" value="${state.searchDate}">
-                    <input type="text" placeholder="授業名" class="p-2 border rounded" oninput="state.searchClassName=this.value; render()" value="${state.searchClassName}">
-                    <input type="text" placeholder="名前" class="p-2 border rounded" oninput="state.searchName=this.value; render()" value="${state.searchName}">
+                    <input type="date" class="p-2 border rounded" oninput="handleAttendanceFilterInput('searchDate', this.value)" value="${state.searchDate}">
+                    <input type="text" placeholder="授業名" class="p-2 border rounded" oninput="handleAttendanceFilterInput('searchClassName', this.value)" value="${state.searchClassName}">
+                    <input type="text" placeholder="名前" class="p-2 border rounded" oninput="handleAttendanceFilterInput('searchName', this.value)" value="${state.searchName}">
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left">
@@ -484,7 +510,9 @@
                                 <th class="p-3">日付</th><th class="p-3">授業名</th><th class="p-3">ID</th><th class="p-3">名前</th><th class="p-3">状況</th><th class="p-3">コメント</th><th class="p-3">操作</th>
                             </tr>
                         </thead>
-                        <tbody>${listHtml}</tbody>
+                        <tbody id="attendance-tbody">
+                            <!-- rows are injected dynamically for responsive typing -->
+                        </tbody>
                     </table>
                 </div>
                 <div class="p-4 border-t">
@@ -641,6 +669,12 @@
             
             // アイコン再描画
             renderIcons();
+
+            // If attendance-list is visible, populate its table body (so filtering works per keystroke)
+            if (state.currentView === 'attendance-list') {
+                // small timeout to ensure DOM is updated
+                setTimeout(updateAttendanceTableInDOM, 0);
+            }
         };
 
         // --- 初期化 ---
