@@ -360,11 +360,28 @@
                     <i data-lucide="check-circle" class="h-8 w-8 text-green-600"></i>
                 </div>
                 <h2 class="text-xl font-bold text-green-700 mb-2">作成完了</h2>
-                <p class="text-gray-500 mb-6">生徒に以下のコードを共有してください</p>
-                <div class="bg-indigo-50 p-6 rounded-xl border-2 border-indigo-200 mb-6">
-                    <span class="text-4xl font-mono font-bold text-indigo-700 tracking-widest">${state.activeForm.code}</span>
+                
+                <div class="space-y-6 text-left">
+                    <div>
+                        <p class="text-sm font-bold text-gray-500 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">1</span> 出席コード</p>
+                        <div class="bg-indigo-50 p-4 rounded-xl border-2 border-indigo-200 text-center">
+                            <span class="text-4xl font-mono font-bold text-indigo-700 tracking-widest">${state.activeForm.code}</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-bold text-gray-500 mb-2 flex items-center gap-2"><span class="w-5 h-5 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xs">2</span> ログインURL</p>
+                        <div class="flex gap-2">
+                            <input type="text" value="${window.location.href}" readonly class="w-full p-2 border rounded bg-gray-50 text-xs text-gray-500 font-mono">
+                            <button onclick="navigator.clipboard.writeText(window.location.href); showToast('URLをコピーしました')" class="px-3 border rounded hover:bg-gray-50 flex items-center justify-center" title="コピー">
+                                <i data-lucide="copy" class="h-4 w-4"></i>
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">※ 学生はこのURLからアクセスしてコードを入力します</p>
+                    </div>
                 </div>
-                <button onclick="state.currentView='teacher-dashboard'; render()" class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">ダッシュボードへ戻る</button>
+
+                <button onclick="state.currentView='teacher-dashboard'; render()" class="w-full mt-8 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700">ダッシュボードへ戻る</button>
             </div>
         `;
 
