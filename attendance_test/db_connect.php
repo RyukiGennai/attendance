@@ -1,6 +1,6 @@
 <?php
 // セッション開始（全ページ共通）
-session_start();
+//session_start();
 
 // DB接続設定
 $host = 'localhost';
