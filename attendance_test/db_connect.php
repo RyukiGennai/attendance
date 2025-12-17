@@ -6,7 +6,7 @@ session_start();
 $host = 'localhost';
 $dbname = 'attendance_db';
 $username = 'root'; // 環境に合わせて変更してください
-$password = '';     // 環境に合わせて変更してください
+$password = 'root';     // 環境に合わせて変更してください
 
 try {
     $pdo = new PDO("mysql:host=$host;port=3307;dbname=$dbname;charset=utf8", $username, $password);
