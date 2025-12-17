@@ -14,7 +14,7 @@ error_reporting(E_ALL);
             <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">出席管理システム</h1>
             <p class="text-gray-500 mt-2">ログインして始めましょう</p>
         </div>
-        <form action="/test/actions.php" method="post" class="space-y-4">
+        <form action="actions.php" method="post" class="space-y-4">
             <input type="hidden" name="action" value="login">
             <div>
                 <label class="block text-sm font-medium mb-1">ユーザーID</label>

@@ -37,7 +37,7 @@ $user = $_SESSION['user'] ?? null;
             <div class="flex items-center gap-4">
                 <?php if ($user): ?>
                     <span class="text-sm font-medium"><?= htmlspecialchars($user['name'], ENT_QUOTES) ?></span>
-                    <form action="/test/actions.php" method="post" class="inline">
+                    <form action="actions.php" method="post" class="inline">
                         <input type="hidden" name="action" value="logout">
                         <button type="submit" class="text-muted-foreground flex items-center hover:text-gray-900">
                             <i data-lucide="log-out" class="h-4 w-4 mr-2"></i> ログアウト
