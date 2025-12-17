@@ -1,62 +1,48 @@
 <?php
-require 'db_connect.php';
+session_start();
+require_once 'db_connect.php';
 
 $error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $uid = $_POST['userid'];
-    $pwd = $_POST['password'];
+    $user_id = $_POST['user_id'];
+    $password = $_POST['password'];
 
-    // DBからユーザー検索
-    $stmt = $pdo->prepare("SELECT * FROM mst_user WHERE USER_ID = ?");
-    $stmt->execute([$uid]);
-    $user = $stmt->fetch();
+    // ユーザー認証
+    $stmt = $pdo->prepare("SELECT * FROM mst_user WHERE USER_ID = :uid");
+    $stmt->bindValue(':uid', $user_id);
+    $stmt->execute();
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    // パスワード確認
-    if ($user && $user['PASSWORD'] === $pwd) {
-        // セッションに保存
+    if ($user && $user['PASSWORD'] === $password) {
         $_SESSION['user_id'] = $user['USER_ID'];
         $_SESSION['name'] = $user['NAME'];
         $_SESSION['role'] = $user['ROLE'];
-        $_SESSION['student_number'] = $user['STUDENT_NUMBER'];
 
-        // ロールで振り分け (1=先生, 2=生徒 と仮定)
-        if ($user['ROLE'] == 1 || $user['ROLE'] == 'teacher') {
-            header("Location: teacher_dashboard.php");
+        // ロールによる分岐 (仕様: 0=出席フォーム, 1=ダッシュボード)
+        if ($user['ROLE'] == 1) {
+            header('Location: teacher_dashboard.php');
         } else {
-            header("Location: student_dashboard.php");
+            header('Location: student_dashboard.php'); // 出席フォーム画面
         }
         exit;
     } else {
-        $error = 'IDまたはパスワードが間違っています';
+        $error = 'ユーザーIDまたはパスワードが違います';
     }
 }
+require_once 'header.php';
 ?>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ログイン - AttendancePro</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-xl shadow-md w-full max-w-sm">
-        <h1 class="text-2xl font-bold text-center mb-6 text-indigo-600">AttendancePro</h1>
-        <?php if($error): ?>
-            <p class="text-red-500 text-sm mb-4 text-center"><?= htmlspecialchars($error) ?></p>
-        <?php endif; ?>
-        <form method="POST" action="">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">ユーザーID</label>
-                <input type="text" name="userid" class="w-full p-2 border rounded" required>
-            </div>
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">パスワード</label>
-                <input type="password" name="password" class="w-full p-2 border rounded" required>
-            </div>
-            <button type="submit" class="w-full bg-indigo-600 text-white p-2 rounded hover:bg-indigo-700">ログイン</button>
-        </form>
-    </div>
-</body>
-</html>
+<div class="bg-white p-8 rounded shadow-md w-96">
+    <h2 class="text-2xl font-bold mb-6 text-center">出席管理システム</h2>
+    <?php if ($error): ?><p class="text-red-500 mb-4"><?= $error ?></p><?php endif; ?>
+    <form method="post">
+        <label class="block mb-2 font-bold">ユーザーID</label>
+        <input type="text" name="user_id" class="w-full border p-2 mb-4 rounded" placeholder="ユーザーIDを入力" required>
+        
+        <label class="block mb-2 font-bold">パスワード</label>
+        <input type="password" name="password" class="w-full border p-2 mb-6 rounded" placeholder="パスワードを入力" required>
+        
+        <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700">ログイン</button>
+    </form>
+</div>
+</body></html>
