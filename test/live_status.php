@@ -20,7 +20,7 @@
                         </span>
                         リアルタイム出席状況
                     </h2>
-                    <p id="formInfo" class="text-sm text-gray-500 mt-1">5秒ごとに更新中...</p>
+                    <p id="formInfo" class="text-sm text-gray-500 mt-1">自動更新中...</p>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="text-right">
@@ -30,6 +30,12 @@
                 </div>
             </div>
             
+            <div class="p-4 flex justify-end">
+                <button onclick="finalizeAbsences()" class="px-4 py-2 bg-red-100 text-red-600 rounded hover:bg-red-200 text-sm flex items-center gap-2">
+                    <i data-lucide="user-x" class="h-4 w-4"></i> 締め切り・欠席確定
+                </button>
+            </div>
+
             <div class="overflow-x-auto">
                 <table class="w-full text-left">
                     <thead class="bg-gray-50">
@@ -59,6 +65,7 @@
         const formId = urlParams.get('id');
 
         function renderList() {
+            // DBから最新データを取得（localStorageから読み直し）
             const forms = DB.get('attendanceForms');
             const form = forms.find(f => f.id === formId);
             
@@ -68,7 +75,7 @@
             }
 
             // 情報更新
-            document.getElementById('formInfo').textContent = `5秒ごとに更新中 | ${form.className} (${form.date})`;
+            document.getElementById('formInfo').textContent = `自動更新中 | ${form.className} (${form.date})`;
             document.getElementById('count').textContent = `${form.attendanceList.length}名`;
 
             // リスト更新
@@ -77,7 +84,7 @@
                 tbody.innerHTML = '<tr><td colspan="5" class="py-12 text-center text-gray-400">待機中...</td></tr>';
             } else {
                 tbody.innerHTML = form.attendanceList.map((sub, i) => `
-                    <tr class="border-b hover:bg-gray-50 transition">
+                    <tr class="border-b hover:bg-gray-50 transition fade-in">
                         <td class="p-3 text-center">${i + 1}</td>
                         <td class="p-3 font-mono">${sub.studentId}</td>
                         <td class="p-3">${sub.studentName}</td>
@@ -94,6 +101,13 @@
         }
 
         function finalizeAbsences() {            
+            if (!confirm('未提出の学生をすべて「欠席」として登録しますか？')) return;
+
+            // ★修正: 必要なデータをここで取得・定義します
+            const forms = DB.get('attendanceForms');
+            const records = DB.get('attendanceRecords');
+            const users = DB.get('users');
+
             // 対象フォームの再取得
             const formIndex = forms.findIndex(f => f.id === formId);
             if (formIndex === -1) return;
@@ -137,12 +151,27 @@
             DB.save('attendanceRecords', records);
             
             alert(`${missing.length}名を欠席として登録しました`);
+            // renderListはstorageイベントまたは手動呼び出しで更新されるが、ここでは念のため呼ぶ
             renderList();
         }
 
-        // 初回実行と定期実行
+        // 初回実行
         renderList();
+        
+        // 5秒ごとの定期更新（念のため残しておきます）
         setInterval(renderList, 5000);
+
+        // ★追加: 他のタブ（学生画面）での変更を検知して即座に更新するイベント
+        window.addEventListener('storage', (e) => {
+            // attendanceForms データに変更があった場合のみ再描画
+            if (e.key === 'attendanceForms') {
+                renderList();
+            }
+        });
     </script>
+    <style>
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 </body>
 </html>
