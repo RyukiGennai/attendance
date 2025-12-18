@@ -8,7 +8,7 @@ $stmt->execute([$_SESSION['user_id']]);
 $me = $stmt->fetch();
 
 $msg = '';
-$default_code = $_GET['code'] ?? ''; // URLからコード取得
+$default_code = $_GET['code'] ?? '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input_code = $_POST['code'];
@@ -26,8 +26,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($check->rowCount() > 0) {
                 $msg = "すでに出席済みです";
             } else {
-                $ins = $pdo->prepare("INSERT INTO tbl_attendance_status (ATTENDANCE_STATUS, USER_ID, CLASS_ID, TIMESTAMP) VALUES ('出席', ?, ?, NOW())");
-                $ins->execute([$me['USER_ID'], $class['CLASS_ID']]);
+                // --- ここから時間判定ロジック ---
+                
+                // データベースの時刻(文字列)をUNIXタイムスタンプに変換
+                $create_time = strtotime($class['TIME']);
+                $now_time = time();
+                
+                // 差分（分）を計算
+                $diff_min = ($now_time - $create_time) / 60;
+                
+                $status = '欠席'; // デフォルト
+                if ($diff_min <= 10) {
+                    $status = '出席';
+                } elseif ($diff_min <= 15) {
+                    $status = '遅刻';
+                }
+                
+                // 判定したステータスで登録
+                $ins = $pdo->prepare("INSERT INTO tbl_attendance_status (ATTENDANCE_STATUS, USER_ID, CLASS_ID, TIMESTAMP) VALUES (?, ?, ?, NOW())");
+                $ins->execute([$status, $me['USER_ID'], $class['CLASS_ID']]);
+                
+                // 完了画面へ (欠席でも登録は完了させる仕様にしています)
                 header('Location: attendance_complete.php');
                 exit;
             }
