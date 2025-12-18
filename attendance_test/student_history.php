@@ -11,10 +11,17 @@ $history = $stmt->fetchAll();
 
 require_once 'header.php';
 ?>
-<div class="w-full max-w-2xl px-4">
-    <h2 class="text-xl font-bold mb-2">自分の出席履歴</h2>
-    <p class="mb-4"><?= htmlspecialchars($_SESSION['name']) ?> さん</p>
-    <p class="text-sm text-gray-500 mb-2">これまでの出席記録を確認できます</p>
+<div class="w-full max-w-2xl px-4 mb-2 flex justify-end">
+    <a href="logout.php" class="text-red-500 hover:underline text-sm">ログアウト</a>
+</div>
+
+<div class="w-full max-w-2xl px-4 mx-auto">
+    <div class="flex justify-between items-end mb-4">
+        <div>
+            <h2 class="text-xl font-bold">自分の出席履歴</h2>
+            <p class="text-sm text-gray-500"><?= htmlspecialchars($_SESSION['name']) ?> さん</p>
+        </div>
+    </div>
     
     <table class="w-full bg-white shadow rounded overflow-hidden mb-6">
         <thead class="bg-gray-200">
@@ -27,9 +34,9 @@ require_once 'header.php';
         <tbody>
             <?php foreach ($history as $row): ?>
             <tr class="border-b text-center">
-                <td class="p-3"><?= $row['DATE'] ?></td>
-                <td class="p-3"><?= $row['CLASS_NAME'] ?></td>
-                <td class="p-3 font-bold text-blue-600"><?= $row['ATTENDANCE_STATUS'] ?></td>
+                <td class="p-3"><?= htmlspecialchars($row['DATE']) ?></td>
+                <td class="p-3"><?= htmlspecialchars($row['CLASS_NAME']) ?></td>
+                <td class="p-3 font-bold text-blue-600"><?= htmlspecialchars($row['ATTENDANCE_STATUS']) ?></td>
             </tr>
             <?php endforeach; ?>
         </tbody>
