@@ -22,5 +22,5 @@ if ($lastId) {
     <div class="bg-indigo-50 p-6 rounded-xl border-2 border-indigo-200 mb-6">
         <span class="text-4xl font-mono font-bold text-indigo-700 tracking-widest"><?= htmlspecialchars($form['code'] ?? '', ENT_QUOTES) ?></span>
     </div>
-    <a href="/html.php?page=teacher/dashboard" class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 inline-block text-center">ダッシュボードへ戻る</a>
+    <a href="html.php?page=teacher/dashboard" class="w-full py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 inline-block text-center">ダッシュボードへ戻る</a>
 </div>

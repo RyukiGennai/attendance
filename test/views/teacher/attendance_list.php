@@ -21,7 +21,7 @@ $filtered = array_filter($records, function($r) use($searchDate,$searchClass,$se
         <a href="html.php?page=teacher/edit_record" class="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm flex items-center gap-2"><i data-lucide="plus-circle" class="h-4 w-4"></i> 新規追加</a>
     </div>
     <div class="p-4 grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-50 border-b">
-        <form method="get" action="html_Version4.php" class="col-span-3 md:col-auto md:flex md:gap-2">
+        <form method="get" action="html.php" class="col-span-3 md:col-auto md:flex md:gap-2">
             <input type="hidden" name="page" value="teacher/attendance_list">
             <input type="date" name="searchDate" class="p-2 border rounded" value="<?= htmlspecialchars($searchDate, ENT_QUOTES) ?>">
             <input type="text" name="searchClassName" placeholder="授業名" class="p-2 border rounded" value="<?= htmlspecialchars($searchClass, ENT_QUOTES) ?>">
