@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '001_index.php';
+$pdo = getDB();
 
 // 本日の最新授業を取得
 $stmt = $pdo->prepare("SELECT * FROM tbl_class WHERE DATE = CURRENT_DATE AND USER_ID = ? ORDER BY CLASS_ID DESC LIMIT 1");

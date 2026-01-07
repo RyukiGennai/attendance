@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '001_index.php';
+$pdo = getDB();
 
 $id = $_GET['id'] ?? null;
 $is_new = (isset($_GET['action']) && $_GET['action'] === 'new');

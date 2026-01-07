@@ -1,9 +1,10 @@
 <?php
 session_start();
 require_once '001_index.php';
+$pdo = getDB();
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
     exit('アクセス権限がありません。教員としてログインし直してください。');
-}$pdo = getDB();
+}
 $msg = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['create'])) {

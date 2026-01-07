@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once '001_index.php';
+$pdo = getDB();
 
 // 削除処理
 if (isset($_POST['delete'])) {
