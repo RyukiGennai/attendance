@@ -1,7 +1,7 @@
 <?php
 session_start();
-if ($_SESSION['role'] != 1) exit;
 require_once '001_index.php';
+if ($_SESSION['role'] != 1) exit;
 $pdo = getDB();
 $msg = '';
 

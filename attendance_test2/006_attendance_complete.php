@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once '001_index.php';
 $status = $_GET['status'] ?? '完了';
 $status_color = ($status === '出席') ? 'text-green-600' : ($status === '遅刻' ? 'text-yellow-600' : 'text-red-600');
 ?>

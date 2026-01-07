@@ -1,7 +1,7 @@
 <?php
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 0) { header('Location: 001_index.php'); exit; }
 require_once '001_index.php';
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 0) { header('Location: 001_index.php'); exit; }
 $pdo = getDB();
 $msg = '';
 $default_code = $_GET['code'] ?? '';

@@ -1,10 +1,14 @@
 <?php
-session_start();
+// セッションがまだ開始されていない場合のみ開始する（エラー回避）
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // --- 共通DB接続設定 ---
 function getDB() {
     $host = 'localhost'; $dbname = 'attendance_db'; $user = 'root'; $pass = 'root';
     try {
+        // MAMPのポート3307に合わせています
         $pdo = new PDO("mysql:host=$host;port=3307;dbname=$dbname;charset=utf8", $user, $pass);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         return $pdo;
@@ -19,7 +23,8 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 }
 
 $error = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+// ログイン処理（user_idがPOSTされたとき、かつこのファイル自身が実行されているときのみ動かす）
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id']) && !isset($_POST['create']) && !isset($_POST['code'])) {
     $pdo = getDB();
     $stmt = $pdo->prepare("SELECT * FROM mst_user WHERE USER_ID = ?");
     $stmt->execute([$_POST['user_id']]);
@@ -33,11 +38,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     } else { $error = 'IDまたはパスワードが違います'; }
 }
+
+// 他のファイルから require されたときは、ここで処理を止めて以下のHTMLを出さないようにする
+if (basename($_SERVER['PHP_SELF']) !== '001_index.php') {
+    return; 
+}
 ?>
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
     <title>ログイン - 出席管理</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -45,7 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="bg-white p-8 rounded-xl shadow-lg w-96">
         <h2 class="text-2xl font-bold mb-6 text-center text-blue-600">出席管理システム</h2>
         <?php if ($error): ?><p class="text-red-500 mb-4 text-center"><?= $error ?></p><?php endif; ?>
-        <form method="post">
+        <form method="post" action="001_index.php">
             <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2">ユーザーID</label>
                 <input type="text" name="user_id" class="w-full border p-3 rounded focus:outline-blue-500" required>
