@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once '001_index.php';
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
     exit('アクセス権限がありません。教員としてログインし直してください。');

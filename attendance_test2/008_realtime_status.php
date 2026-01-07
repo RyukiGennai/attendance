@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once '001_index.php';
 
 // 本日の最新授業を取得

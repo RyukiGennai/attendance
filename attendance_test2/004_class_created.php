@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once '001_index.php';
 $id = $_GET['id'];
 $stmt = $pdo->prepare("SELECT * FROM tbl_class WHERE CLASS_ID = ?");

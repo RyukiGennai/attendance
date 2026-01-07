@@ -1,4 +1,5 @@
 <?php
+session_start();
 require_once '001_index.php';
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 1) { header('Location: 001_index.php'); exit; }
 ?>
