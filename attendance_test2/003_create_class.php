@@ -22,7 +22,7 @@ require_once 'header.php';
         <input type="text" name="class_name" placeholder="授業名" class="w-full border p-3 rounded" required>
         <input type="date" name="date" value="<?= date('Y-m-d') ?>" class="w-full border p-3 rounded" required>
         <div class="flex gap-2">
-            <input type="text" id="code" name="attendance_code" placeholder="出席コード" maxlength="6" class="w-full border p-3 rounded text-center font-bold uppercase" required>
+            <input type="text" id="code" name="attendance_code" placeholder="出席コード" maxlength="6" class="w-full border p-3 rounded" required>
             <button type="button" onclick="document.getElementById('code').value = Math.random().toString(36).substring(2,8).toUpperCase()" class="bg-gray-200 px-4 rounded">生成</button>
         </div>
         <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded font-bold">作成</button>
