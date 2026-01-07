@@ -1,9 +1,6 @@
 <?php
-session_start();
 require_once '001_index.php';
 if (!isset($_SESSION['role']) || $_SESSION['role'] != 1) {
-    // 白飛びさせず、理由を表示して止める（デバッグ用）
-    // 確認できたら header('Location: 001_index.php'); exit; に書き換えてもOK
     exit('アクセス権限がありません。教員としてログインし直してください。');
 }$pdo = getDB();
 $msg = '';
