@@ -56,7 +56,7 @@ require_once 'header.php';
     <form method="post" class="space-y-4">
         <div>
             <label class="block font-bold mb-1">学籍番号</label>
-            <input type="text" name="student_number" value="<?= htmlspecialchars($data['STUDENT_NUMBER']) ?>" class="w-full border p-2 rounded" placeholder="例: STU001" required>
+            <input type="text" name="student_number" value="<?= htmlspecialchars($data['STUDENT_NUMBER']) ?>" class="w-full border p-2 rounded" placeholder="例: K000C0000" required>
         </div>
 
         <div>
