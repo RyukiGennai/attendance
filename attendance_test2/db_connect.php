@@ -9,7 +9,6 @@ $username = 'root';
 $password = 'root';
 
 try {
-    // ポート番号は環境（MAMPなら3306 or 8889等）に合わせて調整してください
     $pdo = new PDO("mysql:host=$host;port=3307;dbname=$dbname;charset=utf8", $username, $password);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
