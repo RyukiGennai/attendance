@@ -1,71 +1,45 @@
 <?php
-// セッションがまだ開始されていない場合のみ開始する（エラー回避）
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
-// --- 共通DB接続設定 ---
-function getDB() {
-    $host = 'localhost'; $dbname = 'attendance_db'; $user = 'root'; $pass = 'root';
-    try {
-        // MAMPのポート3307に合わせています
-        $pdo = new PDO("mysql:host=$host;port=3307;dbname=$dbname;charset=utf8", $user, $pass);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $pdo;
-    } catch (PDOException $e) { exit('DB接続エラー'); }
-}
-
-// ログアウト処理
-if (isset($_GET['action']) && $_GET['action'] === 'logout') {
-    session_destroy();
-    header('Location: 001_index.php');
-    exit;
-}
-
+require_once 'db_connect.php';
 $error = '';
-// ログイン処理（user_idがPOSTされたとき、かつこのファイル自身が実行されているときのみ動かす）
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['user_id']) && !isset($_POST['create']) && !isset($_POST['code'])) {
-    $pdo = getDB();
-    $stmt = $pdo->prepare("SELECT * FROM mst_user WHERE USER_ID = ?");
-    $stmt->execute([$_POST['user_id']]);
-    $user = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if ($user && $user['PASSWORD'] === $_POST['password']) {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $user_id = $_POST['user_id'];
+    $password = $_POST['password'];
+    $pdo = getDB();
+
+    $stmt = $pdo->prepare("SELECT * FROM mst_user WHERE USER_ID = ?");
+    $stmt->execute([$user_id]);
+    $user = $stmt->fetch();
+
+    if ($user && $user['PASSWORD'] === $password) {
         $_SESSION['user_id'] = $user['USER_ID'];
         $_SESSION['name'] = $user['NAME'];
         $_SESSION['role'] = $user['ROLE'];
-        header('Location: ' . ($user['ROLE'] == 1 ? '002_teacher_dashboard.php' : '005_student_dashboard.php'));
-        exit;
-    } else { $error = 'IDまたはパスワードが違います'; }
-}
 
-// 他のファイルから require されたときは、ここで処理を止めて以下のHTMLを出さないようにする
-if (basename($_SERVER['PHP_SELF']) !== '001_index.php') {
-    return; 
+        if ($user['ROLE'] == 1) {
+            header('Location: 002_teacher_dashboard.php');
+        } else {
+            header('Location: 005_student_dashboard.php');
+        }
+        exit;
+    } else {
+        $error = 'ユーザーIDまたはパスワードが違います';
+    }
 }
+require_once 'header.php';
 ?>
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-    <meta charset="UTF-8">
-    <title>ログイン - 出席管理</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-xl shadow-lg w-96">
-        <h2 class="text-2xl font-bold mb-6 text-center text-blue-600">出席管理システム</h2>
-        <?php if ($error): ?><p class="text-red-500 mb-4 text-center"><?= $error ?></p><?php endif; ?>
-        <form method="post" action="001_index.php">
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2">ユーザーID</label>
-                <input type="text" name="user_id" class="w-full border p-3 rounded focus:outline-blue-500" required>
-            </div>
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2">パスワード</label>
-                <input type="password" name="password" class="w-full border p-3 rounded focus:outline-blue-500" required>
-            </div>
-            <button type="submit" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 transition">ログイン</button>
-        </form>
-    </div>
-</body>
-</html>
+<div class="bg-white p-8 rounded shadow-md w-96 mx-auto mt-20">
+    <h2 class="text-2xl font-bold mb-6 text-center">出席管理システム</h2>
+    <?php if ($error): ?><p class="text-red-500 mb-4"><?= $error ?></p><?php endif; ?>
+    <form method="post" class="space-y-4">
+        <div>
+            <label class="block mb-1 font-bold">ユーザーID</label>
+            <input type="text" name="user_id" class="w-full border p-2 rounded" required>
+        </div>
+        <div>
+            <label class="block mb-1 font-bold">パスワード</label>
+            <input type="password" name="password" class="w-full border p-2 rounded" required>
+        </div>
+        <button type="submit" class="w-full bg-blue-600 text-white p-2 rounded font-bold hover:bg-blue-700">ログイン</button>
+    </form>
+</div>
