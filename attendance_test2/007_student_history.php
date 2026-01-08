@@ -9,11 +9,13 @@ $pdo = getDB();
 // ここで「JOIN（結合）」という技を使っています。
 // 「出席記録（tbl_attendance_status）」には授業名が書いていないので、
 // 「授業リスト（tbl_class）」と合体させて、授業名も一緒に連れてくるようにしています。
-$stmt = $pdo->prepare("SELECT a.*, c.CLASS_NAME, c.DATE 
-                       FROM tbl_attendance_status a 
-                       JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID 
-                       WHERE a.USER_ID = ? 
-                       ORDER BY c.DATE DESC");
+$stmt = $pdo->prepare(
+    "SELECT a.*, c.CLASS_NAME, c.DATE,
+    FROM tbl_attendance_status a ,
+    JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID ,
+    WHERE a.USER_ID = ? ,
+    ORDER BY c.DATE DESC"
+    );
 
 // 3. 【命令の実行】「?」の部分に、ログインしている自分のID（セッションに保存されているもの）を当てはめます。
 // 「ORDER BY c.DATE DESC」と書くことで、新しい日付順に並べ替えています。

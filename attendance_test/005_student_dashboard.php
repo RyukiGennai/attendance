@@ -1,83 +1,51 @@
 <?php
-session_start();
 require_once 'db_connect.php';
-if ($_SESSION['role'] != 0) exit;
-
-$stmt = $pdo->prepare("SELECT * FROM mst_user WHERE USER_ID = ?");
-$stmt->execute([$_SESSION['user_id']]);
-$me = $stmt->fetch();
-
+$pdo = getDB();
 $msg = '';
-$default_code = $_GET['code'] ?? '';
-
+$code = $_GET['code'] ?? '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input_code = $_POST['code'];
-    if (!preg_match('/^[A-Z0-9]{6}$/', $input_code)) {
-        $msg = "コードは半角英数字6桁です";
+    $stmt = $pdo->prepare("SELECT * FROM tbl_class WHERE ATTENDANCE_CODE = ?");
+    $stmt->execute([$input_code]);
+    $class = $stmt->fetch();
+    if ($class) {
+        $stmt = $pdo->prepare("INSERT INTO tbl_attendance_status (USER_ID, CLASS_ID, ATTENDANCE_STATUS, TIMESTAMP) VALUES (?, ?, '出席', NOW())");
+        $stmt->execute([$_SESSION['user_id'], $class['CLASS_ID']]);
+        header("Location: 006_attendance_complete.php");
+        exit;
+
     } else {
-        $stmt = $pdo->prepare("SELECT * FROM tbl_class WHERE ATTENDANCE_CODE = ?");
-        $stmt->execute([$input_code]);
-        $class = $stmt->fetch();
-        
-        if ($class) {
-            $check = $pdo->prepare("SELECT * FROM tbl_attendance_status WHERE USER_ID = ? AND CLASS_ID = ?");
-            $check->execute([$me['USER_ID'], $class['CLASS_ID']]);
-            
-            if ($check->rowCount() > 0) {
-                $msg = "すでに出席済みです";
-            } else {
-                // --- ここから時間判定ロジック ---
-                
-                // データベースの時刻(文字列)をUNIXタイムスタンプに変換
-                $create_time = strtotime($class['TIME']);
-                $now_time = time();
-                
-                // 差分（分）を計算
-                $diff_min = ($now_time - $create_time) / 60;
-                
-                $status = '欠席'; // デフォルト
-                if ($diff_min <= 10) {
-                    $status = '出席';
-                } elseif ($diff_min <= 15) {
-                    $status = '遅刻';
-                }
-                
-                // 判定したステータスで登録
-                $ins = $pdo->prepare("INSERT INTO tbl_attendance_status (ATTENDANCE_STATUS, USER_ID, CLASS_ID, TIMESTAMP) VALUES (?, ?, ?, NOW())");
-                $ins->execute([$status, $me['USER_ID'], $class['CLASS_ID']]);
-                
-                // 完了画面へ (欠席でも登録は完了させる仕様にしています)
-                header('Location: attendance_complete.php');
-                exit;
-            }
-        } else {
-            $msg = "無効な出席コードです";
-        }
+        $msg = "無効なコードです";
     }
 }
 require_once 'header.php';
 ?>
-<div class="w-full max-w-md px-4 mb-4 text-right">
-    <a href="logout.php" class="text-red-500 hover:underline text-sm">ログアウト</a>
-</div>
 
-<div class="w-full max-w-md bg-white p-6 rounded shadow mx-auto">
-    <h2 class="text-xl font-bold mb-4 text-center">出席管理システム</h2>
+<div class="max-w-md w-full bg-white p-8 rounded shadow mx-auto mt-10">
     
-    <div class="bg-gray-50 p-4 mb-6 rounded text-center">
-        <p class="text-lg font-bold"><?= htmlspecialchars($me['NAME']) ?></p>
-        <p class="text-gray-500">学籍番号: <?= htmlspecialchars($me['STUDENT_NUMBER']) ?></p>
-    </div>
-    
-    <?php if($msg): ?><p class="text-red-500 text-center mb-2 font-bold"><?= $msg ?></p><?php endif; ?>
-    
-    <form method="post">
-        <label class="block mb-2 font-bold">出席コード</label>
-        <input type="text" name="code" value="<?= htmlspecialchars($default_code) ?>" class="w-full border p-3 text-center text-xl mb-4 rounded tracking-widest" placeholder="6桁のコード" maxlength="6" required>
+    <div class="relative flex items-center justify-center mb-6">
+        <h2 class="text-xl font-bold">出席送信</h2>
         
-        <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700">出席を送信</button>
+        <a href="logout.php" class="absolute right-0 text-red-500 hover:underline text-sm">
+            ログアウト
+        </a>
+    </div>
+
+    <p class="text-center mb-6 text-gray-600 border-b pb-2">
+        <strong><?= htmlspecialchars($_SESSION['name'] ?? '学生') ?></strong>
+    </p>
+
+    <?php if($msg): ?><p class="text-red-500 text-center mb-4"><?= $msg ?></p><?php endif; ?>
+
+    <form method="post" class="space-y-4">
+        <input type="text" name="code" value="<?= htmlspecialchars($code) ?>" placeholder="出席コード入力" class="w-full border p-4 text-center text-2xl font-bold" required>
+        
+        <button type="submit" class="w-full bg-blue-600 text-white p-4 rounded font-bold text-lg hover:bg-blue-700 transition">
+            出席を送信する
+        </button>
     </form>
-    
-    <a href="student_history.php" class="block w-full bg-gray-500 text-white text-center py-2 rounded mt-4 hover:bg-gray-600">過去の出席履歴</a>
+
+    <a href="007_student_history.php" class="block text-center mt-6 text-blue-500 hover:underline">
+        自分の出席履歴を見る
+    </a>
 </div>
-</body></html>
