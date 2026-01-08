@@ -1,61 +1,57 @@
 <?php
-// 1. 【準備】データベースに接続する設定を読み込みます。
 require_once 'db_connect.php';
-
-// URLの「?id=10」などの部分から、編集したいデータの番号を拾います。
-// もし番号がなければ「null（空っぽ）」にします。
 $id = $_GET['id'] ?? null;
-
-// URLに「?action=new」と書いてあれば「新規作成モード」だと判断します。
 $is_new = (isset($_GET['action']) && $_GET['action'] === 'new');
-
-// 画面に出すエラーメッセージと、入力欄に表示する初期データを用意しておきます。
 $msg = ''; 
 $data = ['STUDENT_NUMBER' => '', 'DATE' => date('Y-m-d'), 'CLASS_NAME' => '', 'ATTENDANCE_STATUS' => '出席'];
 
-// 2. 【保存ボタンが押された時の処理】
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // 画面の入力欄から送られてきたデータを変数にまとめます。
     $s_num = $_POST['student_number'];
     $date = $_POST['date'];
     $c_name = $_POST['class_name'];
     $status = $_POST['status'];
 
-    // 3. 【名前の逆引き】学籍番号から「ユーザーID（通し番号）」を調べます。
-    // 出席テーブルには学籍番号ではなく、ユーザーIDで保存する決まりだからです。
+    // 1. 【ユーザー確認】学籍番号から生徒を特定します（これは必須！）
     $u_stmt = $pdo->prepare("SELECT USER_ID FROM mst_user WHERE STUDENT_NUMBER = ?");
     $u_stmt->execute([$s_num]);
     $user = $u_stmt->fetch();
 
-    // 4. 【授業の逆引き】日付と授業名から「授業ID」を調べます。
-    // 「2023-10-25のプログラミング」が、何番の授業なのかを特定します。
-    $c_stmt = $pdo->prepare("SELECT CLASS_ID FROM tbl_class WHERE DATE = ? AND CLASS_NAME = ?");
-    $c_stmt->execute([$date, $c_name]);
-    $class = $c_stmt->fetch();
-
-    // 5. 【エラーチェック】入力された学籍番号や授業が実在するか確認します。
     if (!$user) {
-        $msg = "エラー：学籍番号「{$s_num}」が見つかりません。";
-    } elseif (!$class) {
-        $msg = "エラー：{$date} の「{$c_name}」という授業が見つかりません。";
+        $msg = "エラー：学籍番号「{$s_num}」が見つかりません。名簿を確認してください。";
     } else {
-        // 6. 【データの保存】
-        if ($is_new) {
-            // 新規作成モードなら、新しい行を「追加（INSERT）」します。
-            $sql = "INSERT INTO tbl_attendance_status (USER_ID, CLASS_ID, ATTENDANCE_STATUS, TIMESTAMP) VALUES (?, ?, ?, NOW())";
-            $pdo->prepare($sql)->execute([$user['USER_ID'], $class['CLASS_ID'], $status]);
+        // 2. 【授業確認】日付と授業名で検索
+        $c_stmt = $pdo->prepare("SELECT CLASS_ID FROM tbl_class WHERE DATE = ? AND CLASS_NAME = ?");
+        $c_stmt->execute([$date, $c_name]);
+        $class = $c_stmt->fetch();
+
+        // ★ここが改造ポイント！【授業の自動作成】
+        // 授業が見つからなければ、新しく作って ID をゲットする
+        if (!$class) {
+            // ランダムな出席コードを仮で作っておきます
+            $temp_code = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
+            $ins_c = $pdo->prepare("INSERT INTO tbl_class (CLASS_NAME, DATE, TIME, ATTENDANCE_CODE, USER_ID) VALUES (?, ?, NOW(), ?, ?)");
+            $ins_c->execute([$c_name, $date, $temp_code, $_SESSION['user_id']]);
+            $class_id = $pdo->lastInsertId(); // 今作った授業の番号を取得
         } else {
-            // 編集モードなら、すでにある行を「上書き（UPDATE）」します。
-            $sql = "UPDATE tbl_attendance_status SET USER_ID = ?, CLASS_ID = ?, ATTENDANCE_STATUS = ? WHERE ATTENDANCE_ID = ?";
-            $pdo->prepare($sql)->execute([$user['USER_ID'], $class['CLASS_ID'], $status, $id]);
+            $class_id = $class['CLASS_ID']; // すでにある場合はその番号を使う
         }
-        // 保存が終わったら、一覧画面（009）に戻ります。
+
+        // 3. 【出席の保存】
+        if ($is_new) {
+            // 新規追加
+            $sql = "INSERT INTO tbl_attendance_status (USER_ID, CLASS_ID, ATTENDANCE_STATUS, TIMESTAMP) VALUES (?, ?, ?, NOW())";
+            $pdo->prepare($sql)->execute([$user['USER_ID'], $class_id, $status]);
+        } else {
+            // 編集
+            $sql = "UPDATE tbl_attendance_status SET USER_ID = ?, CLASS_ID = ?, ATTENDANCE_STATUS = ? WHERE ATTENDANCE_ID = ?";
+            $pdo->prepare($sql)->execute([$user['USER_ID'], $class_id, $status, $id]);
+        }
         header('Location: 009_attendance_list.php');
         exit;
     }
 }
 
-// 7. 【初期データの読み込み】編集モードの時だけ、今現在の登録内容をデータベースから取ってきます。
+// （以下、HTML部分は変更なしでOKです）
 if ($id && !$is_new) {
     $stmt = $pdo->prepare(
         "SELECT a.*, u.STUDENT_NUMBER, c.CLASS_NAME, c.DATE 

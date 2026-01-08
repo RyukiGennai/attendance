@@ -59,7 +59,7 @@ require_once 'header.php';
     </div>
 
     <p class="text-center mb-6 text-gray-600 border-b pb-2">
-        ログイン中：<strong><?= htmlspecialchars($_SESSION['name'] ?? '学生') ?></strong>
+        <strong><?= htmlspecialchars($_SESSION['name'] ?? '学生') ?></strong>
     </p>
 
     <?php if($msg): ?><p class="text-red-500 text-center mb-4"><?= $msg ?></p><?php endif; ?>
