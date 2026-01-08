@@ -14,9 +14,6 @@ require_once 'header.php';
         
         <a href="logout.php" class="text-red-500 hover:underline">ログアウト</a>
     </div>
-
-    <p class="mb-8 text-xl"><?= htmlspecialchars($_SESSION['name'] ?? '先生') ?> 先生</p>
-
     <div class="space-y-4">
         
         <a href="003_create_class.php" class="block w-full bg-blue-600 text-white text-center py-4 rounded text-lg font-bold hover:bg-blue-700">
