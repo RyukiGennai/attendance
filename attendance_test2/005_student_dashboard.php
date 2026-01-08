@@ -52,6 +52,8 @@ require_once 'header.php';
 <div class="max-w-md w-full bg-white p-8 rounded shadow mx-auto mt-10">
     
     <h2 class="text-xl font-bold mb-4 text-center">出席送信</h2>
+
+    <a href="logout.php" class="text-red-500 hover:underline">ログアウト</a>
     
     <p class="text-center mb-6"><?= htmlspecialchars($_SESSION['name'] ?? '学生') ?></p>
 
