@@ -4,7 +4,7 @@ require_once 'header.php';
 ?>
 <div class="w-full max-w-2xl px-4 mx-auto">
     <div class="flex justify-between items-center mb-8">
-        <h1 class="text-3xl font-bold">教員メニュー</h1>
+        <h1 class="text-3xl font-bold">教員ダッシュボード</h1>
         <a href="logout.php" class="text-red-500 hover:underline">ログアウト</a>
     </div>
     <p class="mb-8 text-xl"><?= htmlspecialchars($_SESSION['name'] ?? '先生') ?> 先生</p>
