@@ -7,7 +7,7 @@ require_once 'header.php';
         <h1 class="text-3xl font-bold">教員メニュー</h1>
         <a href="logout.php" class="text-red-500 hover:underline">ログアウト</a>
     </div>
-    <p class="mb-8 text-xl">ようこそ、<?= htmlspecialchars($_SESSION['name'] ?? '先生') ?> 先生</p>
+    <p class="mb-8 text-xl"><?= htmlspecialchars($_SESSION['name'] ?? '先生') ?> 先生</p>
     <div class="space-y-4">
         <a href="003_create_class.php" class="block w-full bg-blue-600 text-white text-center py-4 rounded text-lg font-bold hover:bg-blue-700">出席フォームを作成</a>
         <a href="008_realtime_status.php" class="block w-full bg-green-600 text-white text-center py-4 rounded text-lg font-bold hover:bg-green-700">リアルタイム出席状況</a>

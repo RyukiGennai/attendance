@@ -21,7 +21,7 @@ require_once 'header.php';
 ?>
 <div class="max-w-md w-full bg-white p-8 rounded shadow mx-auto mt-10">
     <h2 class="text-xl font-bold mb-4 text-center">出席送信</h2>
-    <p class="text-center mb-6">ようこそ、<?= htmlspecialchars($_SESSION['name'] ?? '学生') ?> さん</p>
+    <p class="text-center mb-6"><?= htmlspecialchars($_SESSION['name'] ?? '学生') ?></p>
     <?php if($msg): ?><p class="text-red-500 text-center mb-4"><?= $msg ?></p><?php endif; ?>
     <form method="post" class="space-y-4">
         <input type="text" name="code" value="<?= htmlspecialchars($code) ?>" placeholder="出席コード入力" class="w-full border p-4 text-center text-2xl font-bold" required>
