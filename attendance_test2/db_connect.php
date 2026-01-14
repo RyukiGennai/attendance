@@ -19,9 +19,6 @@ try {
     // 倉庫への接続を試みます（住所、ポート番号3307、倉庫名、文字の種類などを指定）。
     $pdo = new PDO("mysql:host=$host;port=3307;dbname=$dbname;charset=utf8", $username, $password);
     
-    // エラーが起きた時に、原因を詳しく教えてくれるように設定します。
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     // データベースからデータをもらう時、使いやすい「配列（箱）」の形で受け取るように設定します。
     $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 

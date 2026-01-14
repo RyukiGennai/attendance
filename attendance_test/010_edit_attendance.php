@@ -2,7 +2,7 @@
 require_once 'db_connect.php';
 $id = $_GET['id'] ?? null;
 $is_new = (isset($_GET['action']) && $_GET['action'] === 'new');
-$msg = ''; 
+$msg = '';
 $data = ['STUDENT_NUMBER' => '', 'DATE' => date('Y-m-d'), 'CLASS_NAME' => '', 'ATTENDANCE_STATUS' => '出席'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -10,23 +10,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $date = $_POST['date'];
     $c_name = $_POST['class_name'];
     $status = $_POST['status'];
-    $u_stmt = $pdo->prepare("SELECT USER_ID FROM mst_user WHERE STUDENT_NUMBER = ?");
+    $u_stmt = $pdo->prepare(
+        "SELECT USER_ID FROM mst_user WHERE STUDENT_NUMBER = ?"
+    );
     $u_stmt->execute([$s_num]);
     $user = $u_stmt->fetch();
 
     if (!$user) {
         $msg = "エラー：学籍番号「{$s_num}」が見つかりません。名簿を確認してください。";
     } else {
-        $c_stmt = $pdo->prepare("SELECT CLASS_ID FROM tbl_class WHERE DATE = ? AND CLASS_NAME = ?");
+        $c_stmt = $pdo->prepare(
+            "SELECT CLASS_ID FROM tbl_class WHERE DATE = ? AND CLASS_NAME = ?"
+        );
         $c_stmt->execute([$date, $c_name]);
         $class = $c_stmt->fetch();
         if (!$class) {
             $temp_code = strtoupper(substr(bin2hex(random_bytes(3)), 0, 6));
-            $ins_c = $pdo->prepare("INSERT INTO tbl_class (CLASS_NAME, DATE, TIME, ATTENDANCE_CODE, USER_ID) VALUES (?, ?, NOW(), ?, ?)");
+            $ins_c = $pdo->prepare(
+                "INSERT INTO tbl_class (CLASS_NAME, DATE, TIME, ATTENDANCE_CODE, USER_ID) VALUES (?, ?, NOW(), ?, ?)"
+            );
             $ins_c->execute([$c_name, $date, $temp_code, $_SESSION['user_id']]);
-            $class_id = $pdo->lastInsertId(); 
+            $class_id = $pdo->lastInsertId();
         } else {
-            $class_id = $class['CLASS_ID']; 
+            $class_id = $class['CLASS_ID'];
         }
         if ($is_new) {
             $sql = "INSERT INTO tbl_attendance_status (USER_ID, CLASS_ID, ATTENDANCE_STATUS, TIMESTAMP) VALUES (?, ?, ?, NOW())";
@@ -55,8 +61,8 @@ require_once 'header.php';
 
 <div class="max-w-lg mx-auto bg-white p-8 rounded shadow-lg mt-10">
     <h2 class="text-xl font-bold mb-6"><?= $is_new ? '新規記録の追加' : '出席記録の編集' ?></h2>
-    
-    <?php if($msg): ?><p class="text-red-500 mb-4 font-bold"><?= $msg ?></p><?php endif; ?>
+
+    <?php if ($msg): ?><p class="text-red-500 mb-4 font-bold"><?= $msg ?></p><?php endif; ?>
 
     <form method="post" class="space-y-4">
         <div>

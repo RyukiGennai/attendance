@@ -18,7 +18,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             header('Location: 005_student_dashboard.php');
         }
         exit;
-        
     } else {
         $error = 'ユーザーIDまたはパスワードが違います';
     }
@@ -28,9 +27,9 @@ require_once 'header.php';
 
 <div class="bg-white p-8 rounded shadow-md w-96 mx-auto mt-20">
     <h2 class="text-2xl font-bold mb-6 text-center">出席管理システム</h2>
-    
+
     <?php if ($error): ?><p class="text-red-500 mb-4"><?= $error ?></p><?php endif; ?>
-    
+
     <form method="post" class="space-y-4">
         <div>
             <label class="block mb-1 font-bold">ユーザーID</label>
