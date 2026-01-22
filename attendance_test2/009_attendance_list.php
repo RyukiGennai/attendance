@@ -17,12 +17,12 @@ if (isset($_POST['delete'])) {
 // 出席記録(a)に、ユーザー名簿(u)と授業名簿(c)をくっつけて、「誰がどの授業に出たか」を1行にまとめます。
 // ORDER BY で「日付が新しい順」、同じ日なら「時間が新しい順」に並べています。
 $list = $pdo->query(
-    "SELECT a.*, u.NAME, u.STUDENT_NUMBER, c.CLASS_NAME, c.DATE ,
-    FROM tbl_attendance_status a ,
-    LEFT JOIN mst_user u ON a.USER_ID = u.USER_ID ,
-    LEFT JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID ,
+    "SELECT a.*, u.NAME, u.STUDENT_NUMBER, c.CLASS_NAME, c.DATE
+    FROM tbl_attendance_status a
+    LEFT JOIN mst_user u ON a.USER_ID = u.USER_ID
+    LEFT JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID
     ORDER BY c.DATE DESC, a.TIMESTAMP DESC"
-    )->fetchAll();
+)->fetchAll();
 
 // 4. 【見た目の準備】HTMLの頭の部分を読み込みます。
 require_once 'header.php';

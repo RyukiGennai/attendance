@@ -5,10 +5,10 @@ if (isset($_POST['delete'])) {
     $pdo->prepare("DELETE FROM tbl_attendance_status WHERE ATTENDANCE_ID = ?")->execute([$_POST['id']]);
 }
 $list = $pdo->query(
-    "SELECT a.*, u.NAME, u.STUDENT_NUMBER, c.CLASS_NAME, c.DATE ,
-    FROM tbl_attendance_status a ,
-    LEFT JOIN mst_user u ON a.USER_ID = u.USER_ID ,
-    LEFT JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID ,
+    "SELECT a.*, u.NAME, u.STUDENT_NUMBER, c.CLASS_NAME, c.DATE
+    FROM tbl_attendance_status a
+    LEFT JOIN mst_user u ON a.USER_ID = u.USER_ID
+    LEFT JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID
     ORDER BY c.DATE DESC, a.TIMESTAMP DESC"
 )->fetchAll();
 require_once 'header.php';
