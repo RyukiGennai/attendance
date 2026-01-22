@@ -2,10 +2,10 @@
 require_once 'db_connect.php';
 $pdo = getDB();
 $stmt = $pdo->prepare(
-    "SELECT a.*, c.CLASS_NAME, c.DATE,
-    FROM tbl_attendance_status a ,
-    JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID ,
-    WHERE a.USER_ID = ? ,
+    "SELECT a.*, c.CLASS_NAME, c.DATE
+    FROM tbl_attendance_status a
+    JOIN tbl_class c ON a.CLASS_ID = c.CLASS_ID
+    WHERE a.USER_ID = ?
     ORDER BY c.DATE DESC"
 );
 $stmt->execute([$_SESSION['user_id']]);
