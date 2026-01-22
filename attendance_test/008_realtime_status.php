@@ -37,12 +37,12 @@ require_once 'header.php';
         </thead>
         <tbody>
             <?php foreach ($list as $row): ?>
-                <tr class="text-center border-b">
-                    <td class="p-3 border"><?= htmlspecialchars($row['CLASS_NAME']) ?></td>
-                    <td class="p-3 border"><?= htmlspecialchars($row['STUDENT_NUMBER']) ?></td>
-                    <td class="p-3 border font-bold"><?= htmlspecialchars($row['NAME']) ?></td>
-                    <td class="p-3 border text-green-600 font-bold"><?= htmlspecialchars($row['ATTENDANCE_STATUS']) ?></td>
-                </tr>
+            <tr class="text-center border-b">
+                <td class="p-3 border"><?= htmlspecialchars($row['CLASS_NAME'] ?? '') ?></td>
+                <td class="p-3 border"><?= htmlspecialchars($row['STUDENT_NUMBER'] ?? '') ?></td>
+                <td class="p-3 border font-bold"><?= htmlspecialchars($row['NAME'] ?? '') ?></td>
+                <td class="p-3 border text-green-600 font-bold"><?= htmlspecialchars($row['ATTENDANCE_STATUS'] ?? '') ?></td>
+            </tr>
             <?php endforeach; ?>
 
             <?php if (!$list): ?>
@@ -53,3 +53,4 @@ require_once 'header.php';
         </tbody>
     </table>
 </div>
+
