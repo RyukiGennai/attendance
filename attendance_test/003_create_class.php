@@ -4,7 +4,7 @@ $pdo = getDB();
 $msg = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['attendance_code'];
-    if (preg_match('/^[A-Z0-9]{6}$/', $code)) {
+    if (preg_match('/^[A-Za-z0-9]{6}$/', $code)) {
         $url = "http://" . $_SERVER['SERVER_NAME'] . dirname($_SERVER['PHP_SELF']) . "/005_student_dashboard.php?code=" . $code;
         $stmt = $pdo->prepare("INSERT INTO tbl_class (CLASS_NAME, DATE, TIME, ATTENDANCE_CODE, URL, USER_ID) VALUES (?, ?, NOW(), ?, ?, ?)");
         $stmt->execute([$_POST['class_name'], $_POST['date'], $code, $url, $_SESSION['user_id']]);
