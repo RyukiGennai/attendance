@@ -31,7 +31,7 @@ require_once 'header.php';
         <div class="flex gap-2">
             <input type="text" id="code" name="attendance_code" placeholder="出席コード" maxlength="6" class="w-full border p-3 rounded" required>
 
-            <button type="button" onclick="document.getElementById('code').value = Math.random().toString(36).substring(2,8)" class="bg-gray-200 px-4 rounded">
+            <button type="button" onclick="document.getElementById('code').value = Math.random().toString(36).substring(2,8).toUpperCase()" class="bg-gray-200 px-4 rounded">
                 生成
             </button>
         </div>
